@@ -24,6 +24,30 @@ matrix forward_activation_layer(layer l, matrix x)
     // relu(x)     = x if x > 0 else 0
     // lrelu(x)    = x if x > 0 else .01 * x
     // softmax(x)  = e^{x_i} / sum(e^{x_j}) for all x_j in the same row 
+    int i, j;
+    for(i = 0; i < x.rows; ++i){
+        float sum = 0;
+        for(j = 0; j < x.cols; ++j){
+            int index = i*x.cols + j;
+            float v = x.data[index];
+            if(a == LOGISTIC){
+                y.data[index] = 1/(1+expf(-v));
+            } else if (a == RELU){
+                y.data[index] = (v>0)*v;
+            } else if (a == LRELU){
+                y.data[index] = (v>0) ? v : .01*v;
+            } else if (a == SOFTMAX){
+                y.data[index] = expf(v);
+            }
+            sum += y.data[index];
+        }
+        if (a == SOFTMAX) {
+            for(j = 0; j < x.cols; ++j){
+                int index = i*x.cols + j;
+                y.data[index] /= sum;
+            }
+        }
+    }
 
     return y;
 }
@@ -47,6 +71,21 @@ matrix backward_activation_layer(layer l, matrix dy)
     // d/dx relu(x)     = 1 if x > 0 else 0
     // d/dx lrelu(x)    = 1 if x > 0 else 0.01
     // d/dx softmax(x)  = 1
+
+    int i, j;
+    for(i = 0; i < dx.rows; ++i){
+        for(j = 0; j < dx.cols; ++j){
+            float v = x.data[i*x.cols + j];
+            if(a == LOGISTIC){
+                float fx = 1/(1 + exp(-v));
+                dx.data[i*dx.cols + j] *= fx*(1-fx);
+            } else if (a == RELU){
+                dx.data[i*dx.cols + j] *= (v>0) ? 1 : 0;
+            } else if (a == LRELU){
+                dx.data[i*dx.cols + j] *= (v>0) ? 1 : 0.01;
+            }
+        }
+    }
 
     return dx;
 }
