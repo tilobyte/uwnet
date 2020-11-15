@@ -109,7 +109,7 @@ image col2im(int width, int height, int channels, matrix col, int size,
     int outh = (im.h - 1) / stride + 1;
     int rows = im.c * size * size;
 
-    // TODO: 5.2
+    // 5.2
     // Add values into image im from the column matrix
     int m, n, p, q;
     int out_col, out_row;

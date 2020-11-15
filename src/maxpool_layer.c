@@ -75,6 +75,51 @@ matrix backward_maxpool_layer(layer l, matrix dy)
     // TODO: 6.2 - find the max values in the input again and fill in the
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
+    int h, i, j, k, m, n, p, q;
+    int max_p, max_q;
+    float curr_val;
+    float max_val = -(__builtin_inff());
+    float max_val_delta;
+    int padding = 1;
+    if (l.width % (l.size * l.stride) == 0 && l.height % (l.size * l.stride) == 0) {
+        padding = 0;
+    }
+    for (h = 0; h < dy.rows; ++h) {
+        for (k = 0; k < l.channels; ++k) {
+            for (i = 0; i < outh; ++i) {
+                for (j = 0; j < outw; ++j) {
+                    for (m = 0; m < l.size; ++m) {
+                        for (n = 0; n < l.size; ++n) {
+                            if (padding) {
+                                p = (i * l.stride - 1) + m;
+                                q = (j * l.stride - 1) + n;
+                                if (p < 0 || p >= l.height || q < 0 || q >= l.width) {
+                                    curr_val = 0;
+                                } else {
+                                    curr_val = in.data[(h * l.channels * l.height * l.width) + (k * l.height * l.width) + (p * l.width) + q];
+                                }
+                            } else {
+                                p = (i * l.stride) + m;
+                                q = (j * l.stride) + n;
+                                curr_val = in.data[(h * l.channels * l.height * l.width) + (k * l.height * l.width) + (p * l.width) + q];
+                            }
+                            if (curr_val > max_val) {
+                                max_val = curr_val;
+                                max_val_delta = dy.data[(h * l.channels * outh * outw)
+                                    + (k * outh * outw) + (i * outw) + j];
+                                max_p = p;
+                                max_q = q;
+                            }
+                        }
+                    }
+                    dx.data[(h * l.channels * l.height * l.width) + (k * l.height * l.width)
+                        + (max_p * l.width) + max_q]
+                        += max_val_delta;
+                    max_val = 0;
+                }
+            }
+        }
+    }
 
     return dx;
 }
