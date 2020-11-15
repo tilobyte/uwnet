@@ -241,7 +241,25 @@ matrix backward_convolutional_layer(layer l, matrix dy)
 void update_convolutional_layer(layer l, float rate, float momentum,
     float decay)
 {
-    // TODO: 5.3
+    // Currently l.dw and l.db store:
+    // l.dw = momentum * l.dw_prev - dL/dw
+    // l.db = momentum * l.db_prev - dL/db
+
+    // For our weights we want to include weight decay:
+    // l.dw = l.dw - decay * l.w
+    axpy_matrix(-decay, l.w, l.dw);
+
+    // Then for both weights and biases we want to apply the updates:
+    // l.w = l.w + rate*l.dw
+    // l.b = l.b + rate*l.db
+    axpy_matrix(rate, l.dw, l.w);
+    axpy_matrix(rate, l.db, l.b);
+
+    // Finally, we want to scale dw and db by our momentum to prepare them for the next round
+    // l.dw *= momentum
+    // l.db *= momentum
+    scal_matrix(momentum, l.dw);
+    scal_matrix(momentum, l.db);
 }
 
 // Make a new convolutional layer
