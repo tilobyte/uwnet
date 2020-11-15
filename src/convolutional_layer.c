@@ -91,6 +91,9 @@ matrix im2col(image im, int size, int stride)
         }
     }
 
+    /* printf("col size: %d\n", rows * cols); */
+    /* printf("last index: %d\n", out_row * col.cols + out_col); */
+
     return col;
 }
 
@@ -113,7 +116,7 @@ image col2im(int width, int height, int channels, matrix col, int size,
     // Add values into image im from the column matrix
     int m, n, p, q;
     int out_col, out_row;
-    float old_val, new_val, addend;
+    float new_val, addend;
     int padding = 1;
     int update_pixel = 1;
     // if size * stride divides dimensions of image, we don't need padding
@@ -150,6 +153,8 @@ image col2im(int width, int height, int channels, matrix col, int size,
             }
         }
     }
+    /* printf("col size: %d\n", col.rows * col.cols); */
+    /* printf("last index: %d\n", out_row * col.cols + out_col); */
 
     return im;
 }
@@ -241,24 +246,13 @@ matrix backward_convolutional_layer(layer l, matrix dy)
 void update_convolutional_layer(layer l, float rate, float momentum,
     float decay)
 {
-    // Currently l.dw and l.db store:
-    // l.dw = momentum * l.dw_prev - dL/dw
-    // l.db = momentum * l.db_prev - dL/db
-
-    // For our weights we want to include weight decay:
-    // l.dw = l.dw - decay * l.w
-    axpy_matrix(-decay, l.w, l.dw);
-
-    // Then for both weights and biases we want to apply the updates:
-    // l.w = l.w + rate*l.dw
-    // l.b = l.b + rate*l.db
-    axpy_matrix(rate, l.dw, l.w);
-    axpy_matrix(rate, l.db, l.b);
-
-    // Finally, we want to scale dw and db by our momentum to prepare them for the next round
-    // l.dw *= momentum
-    // l.db *= momentum
+    axpy_matrix(decay, l.w, l.dw);
+    axpy_matrix(-rate, l.dw, l.w);
     scal_matrix(momentum, l.dw);
+
+    // Do the same for biases as well but no need to use weight decay on biases
+
+    axpy_matrix(-rate, l.db, l.b);
     scal_matrix(momentum, l.db);
 }
 

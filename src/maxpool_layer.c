@@ -21,7 +21,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
 
     int h, i, j, k, m, n, p, q;
     float curr_val;
-    float max_val = -(__builtin_inff());
+    float max_val = 0;
     int padding = 1;
     if (l.width % (l.size * l.stride) == 0 && l.height % (l.size * l.stride) == 0) {
         padding = 0;
@@ -59,6 +59,12 @@ matrix forward_maxpool_layer(layer l, matrix in)
         }
     }
 
+    /* printf("in size: %d\n", in.rows * in.cols); */
+    /* printf("last in index: %d\n", ((h - 1) * l.channels * l.height * l.width) + ((k - 1) * l.height * l.width) + (p * l.width) + q); */
+
+    /* printf("out size: %d\n", out.rows * out.cols); */
+    /* printf("last out index: %d\n", ((h - 1) * l.channels * outh * outw) + ((k - 1) * outh * outw) + ((i - 1) * outw) + (j - 1)); */
+
     return out;
 }
 
@@ -72,19 +78,20 @@ matrix backward_maxpool_layer(layer l, matrix dy)
 
     int outw = (l.width - 1) / l.stride + 1;
     int outh = (l.height - 1) / l.stride + 1;
-    // TODO: 6.2 - find the max values in the input again and fill in the
+    // 6.2 - find the max values in the input again and fill in the
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
     int h, i, j, k, m, n, p, q;
-    int max_p, max_q;
+    int max_p = 0, max_q = 0;
     float curr_val;
-    float max_val = -(__builtin_inff());
-    float max_val_delta;
+    float max_val = -999;
+    float max_val_delta = 0;
     int padding = 1;
     if (l.width % (l.size * l.stride) == 0 && l.height % (l.size * l.stride) == 0) {
         padding = 0;
     }
-    for (h = 0; h < dy.rows; ++h) {
+    /* for (h = 0; h < dy.rows; ++h) { */
+    for (h = 0; h < in.rows; ++h) {
         for (k = 0; k < l.channels; ++k) {
             for (i = 0; i < outh; ++i) {
                 for (j = 0; j < outw; ++j) {
@@ -115,7 +122,8 @@ matrix backward_maxpool_layer(layer l, matrix dy)
                     dx.data[(h * l.channels * l.height * l.width) + (k * l.height * l.width)
                         + (max_p * l.width) + max_q]
                         += max_val_delta;
-                    max_val = 0;
+                    max_val = -999;
+                    max_val_delta = 0;
                 }
             }
         }

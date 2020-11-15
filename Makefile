@@ -1,6 +1,6 @@
 OPENCV=0
 OPENMP=0
-DEBUG=1
+DEBUG=0
 
 OBJ=main.o image.o args.o test.o matrix.o list.o data.o classifier.o net.o connected_layer.o activation_layer.o convolutional_layer.o maxpool_layer.o batchnorm_layer.o
 EXOBJ=test.o
