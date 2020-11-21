@@ -1,7 +1,7 @@
 ---
 layout: slides
 title: Deep Learning - 09 - Recurrent Neural Networks
-premalink: /slides/09
+permalink: /slides/09
 ---
 background-image: url('../figs/title.png')
 
@@ -206,80 +206,184 @@ Different options:
 - others...
 
 ---
+
 # GRU: gated recurrent units
 
+.col50[
+    `$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+    `$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+    `$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+    `$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+{% include chart
+chart='
+graph LR
+    xt["\(x_t\)"]
 
+    subgraph GRU
+    x["\(\x\)"]
+    rt["\(r_t\)"]
+    htt["\(\t h_t\)"]
+    zt["\(z_t\)"]
+    xprev["\(\x\)"]
+    xupdate["\(\x\)"]
+    ht["\(h_t\)"]
+    end
 
+    yt["\(y_t\)"]
 
+    xt --> rt
+    xt --> zt
+    xt --> htt
+    rt --> x
+    x --> htt
+    zt --> |"\(1-\)"| xprev
+    htt --> xupdate
+    zt --> xupdate
+
+    xupdate --> ht
+    xprev --> ht
+    ht --> yt
+
+    ht1["\(h_{t-1}\)"]
+    ht1 --> rt
+    ht1 --> x
+    ht1 --> xprev
+'
+caption="GRUs are.... complicated..."
+%}
+]
+---
+# GRU: gated recurrent units
+
+.col50[
+.box[
+.title[Reset Gate]
+`$$ r\_t = \sigma (W\_r \cdot [h\_{t-1}, x\_t])  $$`
+]
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+.box[
+.title[Proposed Output]
+`$$ \t h\_t = \tanh (W \cdot [r\_t \* h\_{t-1}, x\_t])  $$`
+]
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+.box[
+.title[Update Gate]
+`$$ z\_t = \sigma (W\_z \cdot [h\_{t-1}, x\_t]) $$`
+]
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+- **Update Gate**: from old memory and input, which parts of memory get updated with proposal?
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+.box[
+.title[Output]
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+- **Update Gate**: from old memory and input, which parts of memory get updated with proposal?
+- **Output**: output/new memory is a combination of remembered old memory and the proposed output
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
 
 
 {% include chart
 chart='
 graph LR
+    xt["\(x_t\)"]
 
-    s1(A) --> |encode| in1[Input]
-    subgraph Time Step 1
-    in1 --> hidden1[Hidden Layer]
-    hidden1 --> out1[Output]
+    subgraph GRU
+    x["\(\x\)"]
+    rt["\(r_t\)"]
+    htt["\(\t h_t\)"]
+    zt["\(z_t\)"]
+    xprev["\(\x\)"]
+    xupdate["\(\x\)"]
+    ht["\(h_t\)"]
     end
-    out1 --> |decode| outs1(long)
 
-    s2(long) --> |encode| in2[Input]
-    subgraph Time Step 2
-    in2 --> hidden2[Hidden Layer]
-    hidden2 --> out2[Output]
-    end
-    out2 --> |decode| outs2(time)
-    hidden1[Hidden Layer] --> hidden2[Hidden Layer]
+    yt["\(y_t\)"]
 
-    s3(time) --> |encode| in3[Input]
-    subgraph Time Step 3
-    in3 --> hidden3[Hidden Layer]
-    hidden3 --> out3[Output]
-    end
-    out3 --> |decode| outs3(ago)
-    hidden2[Hidden Layer] --> hidden3[Hidden Layer]
+    xt --> rt
+    xt --> zt
+    xt --> htt
+    rt --> x
+    x --> htt
+    zt --> |"\(1-\)"| xprev
+    htt --> xupdate
+    zt --> xupdate
 
-    s4(ago) --> |encode| in4[Input]
-    subgraph Time Step 4
-    in4 --> hidden4[Hidden Layer]
-    hidden4 --> out4[Output]
-    end
-    out4 --> |decode| outs4(in)
-    hidden3[Hidden Layer] --> hidden4[Hidden Layer]
+    xupdate --> ht
+    xprev --> ht
+    ht --> yt
 
-
-
+    ht1["\(h_{t-1}\)"]
+    ht1 --> rt
+    ht1 --> x
+    ht1 --> xprev
 '
-caption="Naive network architecture for processing language data."
+caption="GRUs are.... complicated..."
 %}
-
-.footnote[https://arxiv.org/pdf/1406.1078v3.pdf]
-
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+- **Update Gate**: from old memory and input, which parts of memory get updated with proposal?
+- **Output**: output/new memory is a combination of remembered old memory and the proposed output
+]
 ---
-
-
-# Math Test
-
-$$\frac{d}{dx} L_2(\theta \mid w, x)$$
-
-{% include chart
-chart='
-graph TB
-    c1-->a2
-    subgraph one
-    a1-->a2
-    end
-    subgraph two
-    b1-->b2
-    end
-    subgraph three
-    c1-->c2
-    end
-
-'
-caption="Naive network architecture for processing language data."
-%}
-
----
-
+#LSTM: Long Short-Term Memory
+.col50[
+`$$ f_t = \sigma (W_f x_t + U_f h_{t-1} + b_f)  $$`
+`$$ i_t = \sigma (W_i x_t + U_i h_{t-1} + b_i)  $$`
+`$$ o_t = \sigma (W_o x_t + U_o h_{t-1} + b_o)  $$`
+`$$ c_t = f_t \cdot c_{t-1} + i_t \cdot \sigma (W_c x_t + U_c h_{t-1} + b_c)  $$`
+`$$ h_t = o_t \cdot \sigma(c_t) $$`
+]

@@ -11,4 +11,6 @@ title: Index
 - [Chapter 2 - Neural Networks](notes/02)
 - [Chapter 4 - Convolutional Neural Networks](notes/04)
 - [Chapter 9 - Recurrent Neural Networks](slides/09)
+- [Chapter 10 - Transformers](slides/10)
+- [Chapter 11 - Training and Sampling for Sequences](slides/11)
 

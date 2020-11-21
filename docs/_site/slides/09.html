@@ -17,6 +17,34 @@
   </head>
   <body>
             <style>
+        table, th, td{
+            border: 1px solid black;
+            border-collapse:collapse;
+            text-align:center;
+        }
+        th{
+            padding:.2em 1em;
+        }
+        td{
+            padding:.2em .2em;
+        }
+        img{
+            max-height:500px;
+        }
+        figure{
+            padding:.5em;
+            border:1px solid black;
+            position:relative
+        }
+        figcaption{
+            position: absolute;
+            left:.5em;
+            top: -.9em;
+            border: 1px solid black;
+            padding:0em .2em;
+            background-color:white;
+        }
+
         .remark-code{
             font-size:inherit;
         }
@@ -26,9 +54,13 @@
             font-size:18px;
         }
         .footnote{
+            border:4px solid black;
             position:absolute;
-            bottom:20px;
+            left:35px;
+            bottom:2px;
             font-size:18px;
+            background-color:#fff;
+            padding:.2em;
         }
         .remark-slide-content{
             background-image:url('../figs/bg.png');
@@ -45,6 +77,9 @@
             max-width:100%;
             vertical-align:middle;
         }
+        ul {
+            margin-block-start:0em;
+        }
         /*figure {max-width:100%}*/
         .small {font-size:18px}
         .big {font-size:32px;}
@@ -58,6 +93,26 @@
         .col50{float:left; width:50%}
         .col60{float:left; width:60%}
         .col70{float:left; width:70%}
+        .height100 img,.height100 svg{height:100px;}
+        .height200 img,.height200 svg{height:200px;}
+        .height300 img,.height300 svg{height:300px;}
+        .height400 img,.height400 svg{height:400px;}
+        .height450 img,.height450 svg{height:450px;}
+        .height480 img,.height480 svg{height:480px;}
+        .height500 img,.height500 svg{height:500px;}
+        .box{
+            position:relative;
+            border:4px solid black;
+            padding:.2em;
+        }
+        .box .title{
+            position: absolute;
+            left:.5em;
+            top: -.9em;
+            border: 4px solid black;
+            padding:0em .2em;
+            background-color:white;
+        }
 </style>
 
 <textarea id="source">
@@ -288,11 +343,137 @@ Different options:
 - others...
 
 ---
+
 # GRU: gated recurrent units
 
+.col50[
+    `$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+    `$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+    `$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+    `$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+<figure class="chart">
+<div class="mermaidsvg">
+<div class="mermaid">
 
+graph LR
+    xt["\(x_t\)"]
 
+    subgraph GRU
+    x["\(\x\)"]
+    rt["\(r_t\)"]
+    htt["\(\t h_t\)"]
+    zt["\(z_t\)"]
+    xprev["\(\x\)"]
+    xupdate["\(\x\)"]
+    ht["\(h_t\)"]
+    end
 
+    yt["\(y_t\)"]
+
+    xt --> rt
+    xt --> zt
+    xt --> htt
+    rt --> x
+    x --> htt
+    zt --> |"\(1-\)"| xprev
+    htt --> xupdate
+    zt --> xupdate
+
+    xupdate --> ht
+    xprev --> ht
+    ht --> yt
+
+    ht1["\(h_{t-1}\)"]
+    ht1 --> rt
+    ht1 --> x
+    ht1 --> xprev
+
+</div>
+</div>
+<figcaption>GRUs are.... complicated... <a target="_blank" href="../chartsrc?src=%0Agraph+LR%0A++++xt%5B%22%5C%28x_t%5C%29%22%5D%0A%0A++++subgraph+GRU%0A++++x%5B%22%5C%28%5Cx%5C%29%22%5D%0A++++rt%5B%22%5C%28r_t%5C%29%22%5D%0A++++htt%5B%22%5C%28%5Ct+h_t%5C%29%22%5D%0A++++zt%5B%22%5C%28z_t%5C%29%22%5D%0A++++xprev%5B%22%5C%28%5Cx%5C%29%22%5D%0A++++xupdate%5B%22%5C%28%5Cx%5C%29%22%5D%0A++++ht%5B%22%5C%28h_t%5C%29%22%5D%0A++++end%0A%0A++++yt%5B%22%5C%28y_t%5C%29%22%5D%0A%0A++++xt+--%3E+rt%0A++++xt+--%3E+zt%0A++++xt+--%3E+htt%0A++++rt+--%3E+x%0A++++x+--%3E+htt%0A++++zt+--%3E+%7C%22%5C%281-%5C%29%22%7C+xprev%0A++++htt+--%3E+xupdate%0A++++zt+--%3E+xupdate%0A%0A++++xupdate+--%3E+ht%0A++++xprev+--%3E+ht%0A++++ht+--%3E+yt%0A%0A++++ht1%5B%22%5C%28h_%7Bt-1%7D%5C%29%22%5D%0A++++ht1+--%3E+rt%0A++++ht1+--%3E+x%0A++++ht1+--%3E+xprev%0A">(source)</a></figcaption>
+</figure>
+
+]
+---
+# GRU: gated recurrent units
+
+.col50[
+.box[
+.title[Reset Gate]
+`$$ r\_t = \sigma (W\_r \cdot [h\_{t-1}, x\_t])  $$`
+]
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+.box[
+.title[Proposed Output]
+`$$ \t h\_t = \tanh (W \cdot [r\_t \* h\_{t-1}, x\_t])  $$`
+]
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+.box[
+.title[Update Gate]
+`$$ z\_t = \sigma (W\_z \cdot [h\_{t-1}, x\_t]) $$`
+]
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+- **Update Gate**: from old memory and input, which parts of memory get updated with proposal?
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+.box[
+.title[Output]
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
+]
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+- **Update Gate**: from old memory and input, which parts of memory get updated with proposal?
+- **Output**: output/new memory is a combination of remembered old memory and the proposed output
+]
+
+---
+# GRU: gated recurrent units
+
+.col50[
+`$$ r_t = \sigma (W_r \cdot [h_{t-1}, x_t])  $$`
+`$$ \t h_t = \tanh (W \cdot [r_t * h_{t-1}, x_t])  $$`
+`$$ z_t = \sigma (W_z \cdot [h_{t-1}, x_t]) $$`
+`$$ h_t = (1-z_t)*h_{t-1} + z_t * \t h_t  $$`
 
 
 <figure class="chart">
@@ -300,81 +481,59 @@ Different options:
 <div class="mermaid">
 
 graph LR
+    xt["\(x_t\)"]
 
-    s1(A) --> |encode| in1[Input]
-    subgraph Time Step 1
-    in1 --> hidden1[Hidden Layer]
-    hidden1 --> out1[Output]
+    subgraph GRU
+    x["\(\x\)"]
+    rt["\(r_t\)"]
+    htt["\(\t h_t\)"]
+    zt["\(z_t\)"]
+    xprev["\(\x\)"]
+    xupdate["\(\x\)"]
+    ht["\(h_t\)"]
     end
-    out1 --> |decode| outs1(long)
 
-    s2(long) --> |encode| in2[Input]
-    subgraph Time Step 2
-    in2 --> hidden2[Hidden Layer]
-    hidden2 --> out2[Output]
-    end
-    out2 --> |decode| outs2(time)
-    hidden1[Hidden Layer] --> hidden2[Hidden Layer]
+    yt["\(y_t\)"]
 
-    s3(time) --> |encode| in3[Input]
-    subgraph Time Step 3
-    in3 --> hidden3[Hidden Layer]
-    hidden3 --> out3[Output]
-    end
-    out3 --> |decode| outs3(ago)
-    hidden2[Hidden Layer] --> hidden3[Hidden Layer]
+    xt --> rt
+    xt --> zt
+    xt --> htt
+    rt --> x
+    x --> htt
+    zt --> |"\(1-\)"| xprev
+    htt --> xupdate
+    zt --> xupdate
 
-    s4(ago) --> |encode| in4[Input]
-    subgraph Time Step 4
-    in4 --> hidden4[Hidden Layer]
-    hidden4 --> out4[Output]
-    end
-    out4 --> |decode| outs4(in)
-    hidden3[Hidden Layer] --> hidden4[Hidden Layer]
+    xupdate --> ht
+    xprev --> ht
+    ht --> yt
 
-
-
+    ht1["\(h_{t-1}\)"]
+    ht1 --> rt
+    ht1 --> x
+    ht1 --> xprev
 
 </div>
 </div>
-<figcaption>Naive network architecture for processing language data. <a target="_blank" href="../chartsrc?src=%0Agraph+LR%0A%0A++++s1%28A%29+--%3E+%7Cencode%7C+in1%5BInput%5D%0A++++subgraph+Time+Step+1%0A++++in1+--%3E+hidden1%5BHidden+Layer%5D%0A++++hidden1+--%3E+out1%5BOutput%5D%0A++++end%0A++++out1+--%3E+%7Cdecode%7C+outs1%28long%29%0A%0A++++s2%28long%29+--%3E+%7Cencode%7C+in2%5BInput%5D%0A++++subgraph+Time+Step+2%0A++++in2+--%3E+hidden2%5BHidden+Layer%5D%0A++++hidden2+--%3E+out2%5BOutput%5D%0A++++end%0A++++out2+--%3E+%7Cdecode%7C+outs2%28time%29%0A++++hidden1%5BHidden+Layer%5D+--%3E+hidden2%5BHidden+Layer%5D%0A%0A++++s3%28time%29+--%3E+%7Cencode%7C+in3%5BInput%5D%0A++++subgraph+Time+Step+3%0A++++in3+--%3E+hidden3%5BHidden+Layer%5D%0A++++hidden3+--%3E+out3%5BOutput%5D%0A++++end%0A++++out3+--%3E+%7Cdecode%7C+outs3%28ago%29%0A++++hidden2%5BHidden+Layer%5D+--%3E+hidden3%5BHidden+Layer%5D%0A%0A++++s4%28ago%29+--%3E+%7Cencode%7C+in4%5BInput%5D%0A++++subgraph+Time+Step+4%0A++++in4+--%3E+hidden4%5BHidden+Layer%5D%0A++++hidden4+--%3E+out4%5BOutput%5D%0A++++end%0A++++out4+--%3E+%7Cdecode%7C+outs4%28in%29%0A++++hidden3%5BHidden+Layer%5D+--%3E+hidden4%5BHidden+Layer%5D%0A%0A%0A%0A">(source)</a></figcaption>
+<figcaption>GRUs are.... complicated... <a target="_blank" href="../chartsrc?src=%0Agraph+LR%0A++++xt%5B%22%5C%28x_t%5C%29%22%5D%0A%0A++++subgraph+GRU%0A++++x%5B%22%5C%28%5Cx%5C%29%22%5D%0A++++rt%5B%22%5C%28r_t%5C%29%22%5D%0A++++htt%5B%22%5C%28%5Ct+h_t%5C%29%22%5D%0A++++zt%5B%22%5C%28z_t%5C%29%22%5D%0A++++xprev%5B%22%5C%28%5Cx%5C%29%22%5D%0A++++xupdate%5B%22%5C%28%5Cx%5C%29%22%5D%0A++++ht%5B%22%5C%28h_t%5C%29%22%5D%0A++++end%0A%0A++++yt%5B%22%5C%28y_t%5C%29%22%5D%0A%0A++++xt+--%3E+rt%0A++++xt+--%3E+zt%0A++++xt+--%3E+htt%0A++++rt+--%3E+x%0A++++x+--%3E+htt%0A++++zt+--%3E+%7C%22%5C%281-%5C%29%22%7C+xprev%0A++++htt+--%3E+xupdate%0A++++zt+--%3E+xupdate%0A%0A++++xupdate+--%3E+ht%0A++++xprev+--%3E+ht%0A++++ht+--%3E+yt%0A%0A++++ht1%5B%22%5C%28h_%7Bt-1%7D%5C%29%22%5D%0A++++ht1+--%3E+rt%0A++++ht1+--%3E+x%0A++++ht1+--%3E+xprev%0A">(source)</a></figcaption>
 </figure>
 
-
-.footnote[https://arxiv.org/pdf/1406.1078v3.pdf]
-
+]
+.col50[
+- **Reset Gate**: from old memory and input, which part of memory is important?
+- **Proposed Output**: from the important memory and the input, propose a new memory state/output vector
+- **Update Gate**: from old memory and input, which parts of memory get updated with proposal?
+- **Output**: output/new memory is a combination of remembered old memory and the proposed output
+]
 ---
-
-
-# Math Test
-
-$$\frac{d}{dx} L_2(\theta \mid w, x)$$
-
-<figure class="chart">
-<div class="mermaidsvg">
-<div class="mermaid">
-
-graph TB
-    c1-->a2
-    subgraph one
-    a1-->a2
-    end
-    subgraph two
-    b1-->b2
-    end
-    subgraph three
-    c1-->c2
-    end
-
-
-</div>
-</div>
-<figcaption>Naive network architecture for processing language data. <a target="_blank" href="../chartsrc?src=%0Agraph+TB%0A++++c1--%3Ea2%0A++++subgraph+one%0A++++a1--%3Ea2%0A++++end%0A++++subgraph+two%0A++++b1--%3Eb2%0A++++end%0A++++subgraph+three%0A++++c1--%3Ec2%0A++++end%0A%0A">(source)</a></figcaption>
-</figure>
-
-
----
-
+#LSTM: Long Short-Term Memory
+.col50[
+`$$ f_t = \sigma (W_f x_t + U_f h_{t-1} + b_f)  $$`
+`$$ i_t = \sigma (W_i x_t + U_i h_{t-1} + b_i)  $$`
+`$$ o_t = \sigma (W_o x_t + U_o h_{t-1} + b_o)  $$`
+`$$ c_t = f_t \cdot c_{t-1} + i_t \cdot \sigma (W_c x_t + U_c h_{t-1} + b_c)  $$`
+`$$ h_t = o_t \cdot \sigma(c_t) $$`
+]
 
 </textarea>
 
@@ -384,8 +543,13 @@ graph TB
         tex: {
             macros: {
                 d: "{\\nabla}",
+                t: "\\tilde",
+                x: "{\\times}",
             }
-        }
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'annotation', 'annotation-xml']
+        },
     };
 </script>
 <script type="text/javascript" id="MathJax-script" async
@@ -400,6 +564,7 @@ window.onload = function(){
         startOnLoad:false,
         cloneCssStyles: false,
         flowchart:{
+            //useMaxWidth:false,
             curve:'basis',
             htmlLabels:true,
         },
@@ -422,6 +587,7 @@ window.onload = function(){
             mermaid.init(undefined, diagram);
         }
         slide = document.querySelectorAll('.remark-visible');
+        console.log(slide);
         MathJax.typeset(slide);
     }
     slideshow.on('afterShowSlide', initSlide);
